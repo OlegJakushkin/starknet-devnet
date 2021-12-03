@@ -129,7 +129,11 @@ def check_block_hash(request_args: MultiDict):
 @app.route("/feeder_gateway/get_block", methods=["GET"])
 def get_block():
     check_block_hash(request.args)
-    return "Not implemented", 501
+
+    block_hash = request.args.get("blockHash", type=custom_int) # TODO should this be custom_inted?
+    block_number = request.args.get("blockNumber", type=custom_int)
+    result_dict = starknet_wrapper.get_block(block_hash=block_hash, block_number=block_number)
+    return jsonify(result_dict)
 
 @app.route("/feeder_gateway/get_code", methods=["GET"])
 def get_code():

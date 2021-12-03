@@ -22,6 +22,12 @@ class StarknetWrapper:
         self.transactions = []
         """A chronological list of transactions."""
 
+        self.hash2block = {}
+        """Maps block hash to block."""
+
+        self.blocks = []
+        """A chronological list of blocks (one transaction per block)."""
+
         self.starknet = None
 
     async def get_starknet(self):
@@ -120,6 +126,16 @@ class StarknetWrapper:
             "transaction_hash": transaction_hash
         }
 
+    def store_block(self):
+        raise NotImplementedError
+    
+    def get_block(self, block_hash: str=None, block_number: int=None):
+        if block_hash:
+            return self.hash2block[block_hash]
+        if block_number:
+            return self.blocks[block_number]
+        
+
     def store_transaction(self, contract_address: str, status: TxStatus, error_message: str=None, **transaction_details: dict):
         new_id = len(self.transactions)
         hex_new_id = hex(new_id)
@@ -143,6 +159,7 @@ class StarknetWrapper:
         else:
             transaction["block_hash"] = hex_new_id
             transaction["block_number"] = new_id
+            self.store_block() # TODO
 
         self.transactions.append(transaction)
         return hex_new_id
